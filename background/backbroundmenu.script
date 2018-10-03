@@ -1,0 +1,15 @@
+-- ground.script
+local pieces = { "bkg","bkg"} 
+
+function init(self) 
+	self.speed = 0  -- Speed in pixels/s
+end
+
+function update(self, dt) 
+	for i, p in ipairs(pieces) do 
+		local pos = go.get_position(p)
+		if pos.x <= -1280 then 
+			pos.x = 1280
+		end
+	end
+end
