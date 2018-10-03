@@ -1,0 +1,24 @@
+function init(self)
+	msg.post(".", "acquire_input_focus") 
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and gui.pick_node(gui.get_node("exit"), action.x, action.y) then
+		local button = gui.get_node("exit") 
+		msg.post("@system:", "exit", {code = 0})
+	end
+	if action_id == hash("click") and action.released == true then
+		local button = gui.get_node("new_game") 
+		if gui.pick_node(button, action.x, action.y) then
+			msg.post("loader:/go#loader", "start_game")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_score") then
+		self.score = self.score + message.score
+		local node = gui.get_node("score")
+		gui.set_text(node, self.score)
+	end
+end

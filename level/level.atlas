@@ -1,0 +1,21 @@
+images {
+  image: "/main/images/ground01.png"
+}
+images {
+  image: "/main/images/ground02.png"
+}
+images {
+  image: "/level/images/rock_planks.png"
+}
+images {
+  image: "/level/images/spikes.png"
+}
+images {
+  image: "/runner-assets/extras/items/coin.png"
+}
+images {
+  image: "/level/images/heart.png"
+}
+margin: 1
+extrude_borders: 0
+inner_padding: 0

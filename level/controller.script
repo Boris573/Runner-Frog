@@ -1,0 +1,81 @@
+
+--меню меню паузы и порожения
+--новая сцена
+--фон
+
+-- controller.script
+go.property("speed", 0)
+
+local grid = 460
+local platform_heights = { 100, 200, 350 }
+local coins = 3 
+
+
+
+function init(self)
+	msg.post("ground/controller#script", "set_speed", { speed = self.speed })
+	self.gridw = 0
+	self.spawns = {} 
+	self.lives = 4
+	self.score = 0
+end
+
+function update(self, dt)
+	self.speed = self.speed + dt
+	self.gridw = self.gridw + self.speed * dt
+	if self.gridw >= grid then
+		self.gridw = 0
+
+		-- Maybe spawn a platform at random height
+		if math.random() > 0.2 then
+			local h = platform_heights[math.random(#platform_heights)]
+			local f = "#platform_factory"
+			local coins = coins
+			if math.random() > 0.5 then
+				f = "#platform_long_factory"
+				coins = coins * 2 -- Twice the number of coins on long platforms
+			end
+			
+
+			local p = factory.create(f, vmath.vector3(1600, h, 0), nil, {}, 0.6)
+			msg.post(p, "set_speed", { speed = self.speed })
+			msg.post(p, "create_coins", { coins = coins })
+			table.insert(self.spawns, p) 
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("new_game") then
+		msg.post(".", "set_lives")
+		msg.post(".", "reset")
+		self.lives = 4
+		self.score = 0
+	end
+
+	if message_id == hash("set_lives") then
+		self.speed = 360
+	end
+	
+	if message_id == hash("reset") then 
+		-- Tell the hero to reset.
+		msg.post("hero#script", "reset")
+		msg.post("gui#hud", "set_lives")
+		-- Delete all platforms
+		for i,p in ipairs(self.spawns) do
+			go.delete(p)
+	end
+	self.spawns = {}
+
+	elseif message_id == hash("delete_spawn") then 
+		for i,p in ipairs(self.spawns) do
+			if p == message.id then
+				table.remove(self.spawns, i)
+				go.delete(p)
+			end
+		end
+	
+	elseif message_id == hash("score_coin") then
+		msg.post("gui#hud", "set_score", { score = 50})
+	end
+end
