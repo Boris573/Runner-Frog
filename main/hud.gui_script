@@ -1,0 +1,66 @@
+local text_nodes = {  "life1", "life2", "life3", "life4"}
+
+function init(self)
+	self.score = 0
+	self.lives = 4
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_score") then
+		self.score = self.score + message.score
+		local node = gui.get_node("score")
+		gui.set_text(node, self.score)
+				
+	elseif message_id == hash("show") then
+		msg.post(".", "enable")
+		show(self)
+
+	elseif message_id == hash("hide") then
+		hide(self, enable)
+
+	elseif message_id == hash("show_game_over") then
+		show_game_over(self)
+		
+		
+	elseif message_id == hash("set_lives") then
+		msg.post("controller#script", "set_lives")
+		node = gui.get_node("life" .. self.lives)
+		gui.set_enabled(node, false)
+		local node = gui.get_node("life" .. self.lives)
+		print(self.lives)
+		self.lives = self.lives - 1
+		if self.lives == 0 then
+			hide(self, enable)
+			show_game_over(self)
+			msg.post("hero#script", "game_over")
+		end
+	end	
+end
+
+function hide(self, disable)
+	for i, id in pairs(text_nodes) do
+		node = gui.get_node(id)
+		local c = gui.get_color(node)
+		c.w = 0.0
+		gui.animate(node, gui.PROP_COLOR, c, gui.EASING_INOUTSINE, 0.75, 0.25, 
+			function()
+				if disable == true then
+					msg.post(".", "disable") 
+				end
+			end)
+	end
+end
+
+function show_game_over(self)
+	hide(false)
+	node = gui.get_node("game_over")
+	gui.set_color(node, vmath.vector4(1,1,1,0))
+	gui.set_enabled(node, true)
+	gui.animate(node, gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_INOUTSINE, 10.0, 0.0, 
+		function()
+			gui.set_enabled(node, false)
+			msg.post("loader:/go#loader", "show_menu")
+		end
+		,gui.PLAYBACK_ONCE_PINGPONG
+	)
+end
